@@ -20,9 +20,16 @@ class PersonSerializer(serializers.ModelSerializer):
 class PaymentDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = ['amount', 'name', 'created_at']
+        fields = ['group', 'amount', 'name', 'created_at']
         
 class GroupListSerializer(serializers.ModelSerializer):
+    members = PersonSerializer(many=True, read_only=True)
+
     class Meta:
         model = Group
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'members', 'total_amount']
+        
+class PaymentListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = ['id', 'name', 'payer_name', 'amount', 'created_at']

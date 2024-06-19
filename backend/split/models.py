@@ -16,6 +16,10 @@ class Group(models.Model):
     def __str__(self):
         return self.name
     
+    @property
+    def total_amount(self):
+        return sum(payment.amount for payment in self.payment_set.all())
+    
 class Payment(models.Model):
     name = models.CharField(max_length=200)
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
@@ -26,3 +30,7 @@ class Payment(models.Model):
 
     def __str__(self):
         return self.name
+    
+    @property
+    def payer_name(self):
+        return self.payer.name

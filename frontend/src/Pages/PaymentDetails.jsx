@@ -1,6 +1,11 @@
-import React, { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchGetPayment,
+  fetchUpdatePayment,
+  resetUpdatePayment,
+} from "@/features/PaymentSlice";
 import {
   Card,
   CardContent,
@@ -9,11 +14,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { fetchGetPayment } from "@/features/PaymentSlice";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Check, Pencil, X } from "lucide-react";
 
 function PaymentDetails() {
   const { id } = useParams();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const getPayment = useSelector((state) => state.payment.getPayment);
   const getPaymentStatus = useSelector(
@@ -24,10 +40,46 @@ function PaymentDetails() {
   const payer = getPayment?.payer || "";
   const splitAmount = getPayment?.split_amount || "";
   const PaymentDetails = getPayment?.payment_details || "";
+  const updatePaymentStatus = useSelector(
+    (state) => state.payment.updatePaymentStatus
+  );
+
+  const [editModeName, setEditModeName] = useState(false);
+  const [editName, setEditName] = useState(PaymentDetails.name);
+  const [editModeAmount, setEditModeAmount] = useState(false);
+  const [editAmount, setEditAmount] = useState(PaymentDetails.amount);
 
   useEffect(() => {
     dispatch(fetchGetPayment(id));
   }, [id]);
+
+  useEffect(() => {
+    if (updatePaymentStatus === "succeeded") {
+      dispatch(fetchGetPayment(id));
+      dispatch(resetUpdatePayment());
+      setEditModeName(false);
+      setEditModeAmount(false);
+      alert("Payment updated successfully");
+    } else if (updatePaymentStatus === "failed") {
+      alert("Payment update failed");
+    }
+  }, [updatePaymentStatus]);
+
+  const handleUpdateName = () => {
+    if (editName === "") {
+      alert("Name cannot be empty");
+    } else {
+      dispatch(fetchUpdatePayment({ id: id, amount: null, name: editName }));
+    }
+  };
+
+  const handleUpdateAmount = () => {
+    if (editAmount <= 0) {
+      alert("Amount must be greater than 0");
+    } else {
+      dispatch(fetchUpdatePayment({ id: id, name: null, amount: editAmount }));
+    }
+  };
   return (
     <>
       {getPaymentStatus === "loading" || getPaymentStatus === "idle" ? (
@@ -43,46 +95,126 @@ function PaymentDetails() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between">
-              <div className="flex flex-col">
-                <h2 className="text-base md:text-2xl font-semibold">
-                  {PaymentDetails.name}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {PaymentDetails.created_at
-                    ? PaymentDetails.created_at.split("T")[0]
-                    : ""}
-                </p>
+              <div className="flex space-x-2 ">
+                {editModeName ? (
+                  <>
+                    <Input
+                      id="name"
+                      type="text"
+                      value={editName || ""}
+                      placeholder="Enter new payment name"
+                      onChange={(e) => setEditName(e.target.value)}
+                    />
+                    <Button size="icon" variant="outline">
+                      <Check onClick={handleUpdateName} />
+                    </Button>
+                    <Button size="icon" variant="outline">
+                      <X onClick={() => setEditModeName(false)} />
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex flex-col">
+                      <p className=" font-semibold">
+                        Name : {PaymentDetails.name}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {PaymentDetails.created_at
+                          ? PaymentDetails.created_at.split("T")[0]
+                          : ""}
+                      </p>
+                    </div>
+                    <span
+                      onClick={() => setEditModeName(true)}
+                      className="hover:cursor-pointer"
+                    >
+                      <Pencil size={22} className="mt-1.5" />
+                    </span>
+                  </>
+                )}
               </div>
-              <div>
-                <h2 className="text-base md:text-xl font-semibold">
-                  Total Amount
-                </h2>
-                <p className="text-base md:text-xl text-center font-bold">
-                  ₹{PaymentDetails.amount}
-                </p>
+              <div className="flex space-x-2 ">
+                {editModeAmount ? (
+                  <>
+                    <Input
+                      id="name"
+                      type="number"
+                      value={editAmount || 0}
+                      onChange={(e) => setEditAmount(e.target.value)}
+                      placeholder="Enter new amount"
+                    />
+                    <Button size="icon" variant="outline">
+                      <Check onClick={handleUpdateAmount} />
+                    </Button>
+                    <Button size="icon" variant="outline">
+                      <X onClick={() => setEditModeAmount(false)} />
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex flex-col">
+                      <h2 className="font-semibold">Total Amount</h2>
+                      <p className=" text-center font-bold">
+                        ₹{PaymentDetails.amount}
+                      </p>
+                    </div>
+                    <span
+                      onClick={() => setEditModeAmount(true)}
+                      className="hover:cursor-pointer"
+                    >
+                      <Pencil size={22} className="mt-1.5" />
+                    </span>
+                  </>
+                )}
               </div>
             </div>
-            <p className="text-base md:text-xl font-semibold">
-              Payer - {payer.name}
-            </p>
+            <p className=" font-semibold">Payer - {payer.name}</p>
+            <p className=" font-semibold">Group</p>
+            <div className="flex flex-wrap gap-2 md:gap-4">
+              {paymentFor.map((person) => (
+                <TooltipProvider key={person.id}>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Badge className={"hover:cursor-pointer"}>
+                        {person.name[0].toUpperCase() + person.name.slice(1)}
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{person.name[0] + person.name.slice(1)}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ))}
+            </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex flex-col space-y-4">
             <div className="flex flex-col space-y-2 w-full">
-              <h1 className="text-base md:text-xl font-semibold">
-                How to liquidation
-              </h1>
+              <h1 className=" font-semibold">How to liquidation</h1>
               {paymentFor.map((person) => (
                 <div key={person.id} className="flex justify-between">
                   {person.name !== payer.name && (
                     <>
-                      <p className="text-base md:text-xl">
-                        {person.name} {"->"} {payer.name}
-                      </p>
-                      <p className="text-base md:text-xl">₹{splitAmount}</p>
+                      <div className="flex space-x-2 w-[80%]">
+                        <p className="">{person.name}</p>
+                        <p className="">{"->"}</p>
+                        <p className="">{payer.name}</p>
+                      </div>
+                      <p className=" w-[20%] text-right">₹{splitAmount}</p>
                     </>
                   )}
                 </div>
               ))}
+            </div>
+            <div className="flex justify-between w-full">
+              <Button size="sm" onClick={() => navigate(-1)}>
+                Go Back
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => navigate(`/group/${PaymentDetails.group}`)}
+              >
+                Group Details
+              </Button>
             </div>
           </CardFooter>
         </Card>

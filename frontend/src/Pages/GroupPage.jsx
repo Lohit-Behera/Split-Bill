@@ -108,7 +108,7 @@ function GroupPage() {
           {members.length > 0 && (
             <>
               <p className="text-sm">Members:</p>
-              <div className="flex flex-row space-x-4">
+              <div className="flex flex-wrap gap-4">
                 {members.map((member, index) => (
                   <div key={index}>
                     <p className=" flex bg-secondary p-2 rounded-lg">

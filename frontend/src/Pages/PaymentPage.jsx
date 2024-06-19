@@ -146,7 +146,7 @@ function PaymentPage() {
             </div>
             <div className="grid gap-2">
               <Label>Payment For</Label>
-              <div className="flex space-x-8">
+              <div className="flex flex-wrap gap-4">
                 {persons.map((person, index) => (
                   <div key={index} className="flex items-center space-x-1">
                     <Checkbox
@@ -166,9 +166,12 @@ function PaymentPage() {
               </div>
             </div>
           </CardContent>
-          <CardFooter>
-            <Button className="w-full" onClick={handleSave}>
+          <CardFooter className="flex flex-col space-y-2">
+            <Button className="w-full" onClick={handleSave} size="sm">
               Save
+            </Button>
+            <Button onClick={() => navigate(-1)} className="w-full" size="sm">
+              Go Back
             </Button>
           </CardFooter>
         </Card>

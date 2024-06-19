@@ -9,11 +9,15 @@ export const fetchGroupCreate = createAsyncThunk('group/fetchGroupCreate', async
             },
             body: JSON.stringify(data),
         });
+        if (!response.ok) {
+            const errorData = await response.json();
+            return rejectWithValue(errorData);
+        }
+
         const result = await response.json();
         return result;
-
     } catch (error) {
-        return rejectWithValue(error);
+        return rejectWithValue(error.message);
     }
 })
 
@@ -25,11 +29,15 @@ export const fetchGetGroup = createAsyncThunk('group/fetchGetGroup', async (id, 
                 'Content-Type': 'application/json',
             },
         });
+        if (!response.ok) {
+            const errorData = await response.json();
+            return rejectWithValue(errorData);
+        }
+
         const result = await response.json();
         return result;
-
     } catch (error) {
-        return rejectWithValue(error);
+        return rejectWithValue(error.message);
     }
 })
 
@@ -41,10 +49,15 @@ export const fetchGroupList = createAsyncThunk('group/fetchGroupList', async (da
                 'Content-Type': 'application/json',
             },
         });
+        if (!response.ok) {
+            const errorData = await response.json();
+            return rejectWithValue(errorData);
+        }
+
         const result = await response.json();
         return result;
     } catch (error) {
-        return rejectWithValue(error);
+        return rejectWithValue(error.message);
     }
 })
 
@@ -56,10 +69,36 @@ export const fetchGroupDelete = createAsyncThunk('group/fetchGroupDelete', async
                 'Content-Type': 'application/json',
             },
         });
+        if (!response.ok) {
+            const errorData = await response.json();
+            return rejectWithValue(errorData);
+        }
+
         const result = await response.json();
         return result;
     } catch (error) {
-        return rejectWithValue(error);
+        return rejectWithValue(error.message);
+    }
+})
+
+export const fetchGroupNameUpdate = createAsyncThunk('group/name/update', async (data, {rejectWithValue}) => {
+    try {
+        const response = await fetch(`/api/update/group/name/${data.id}/`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            return rejectWithValue(errorData);
+        }
+
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        return rejectWithValue(error.message);
     }
 })
 
@@ -81,7 +120,11 @@ const groupSlice = createSlice({
 
         deleteGroup: null,
         deleteGroupStatus: 'idle',
-        deleteGroupError: null
+        deleteGroupError: null,
+
+        groupNameUpdate: null,
+        groupNameUpdateStatus: 'idle',
+        groupNameUpdateError: null
     },
     reducers: {
         resetGroup: (state) => {
@@ -93,6 +136,11 @@ const groupSlice = createSlice({
             state.deleteGroup = null;
             state.deleteGroupStatus = 'idle';
             state.deleteGroupError = null;
+        },
+        resetGroupNameUpdate: (state) => {
+            state.groupNameUpdate = null;
+            state.groupNameUpdateStatus = 'idle';
+            state.groupNameUpdateError = null;
         }
     },
     extraReducers: (builder) => {
@@ -145,9 +193,21 @@ const groupSlice = createSlice({
                 state.deleteGroupStatus = 'failed';
                 state.deleteGroupError = action.payload;
             })
+
+            .addCase(fetchGroupNameUpdate.pending, (state) => {
+                state.groupNameUpdateStatus = 'loading';
+            })
+            .addCase(fetchGroupNameUpdate.fulfilled, (state, action) => {
+                state.groupNameUpdateStatus = 'succeeded';
+                state.groupNameUpdate = action.payload;
+            })
+            .addCase(fetchGroupNameUpdate.rejected, (state, action) => {
+                state.groupNameUpdateStatus = 'failed';
+                state.groupNameUpdateError = action.payload;
+            })
     },
 })
 
-export const { resetGroup, resetDeleteGroup } = groupSlice.actions
+export const { resetGroup, resetDeleteGroup, resetGroupNameUpdate } = groupSlice.actions
 
 export default groupSlice.reducer

@@ -3,19 +3,23 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from .models import Group, Payment, Person
-from .serializers import GroupSerializer, PaymentSerializer, PersonSerializer, PaymentDetailsSerializer, GroupListSerializer
+from .serializers import GroupSerializer, PaymentSerializer, PersonSerializer, PaymentDetailsSerializer, GroupListSerializer, PaymentListSerializer
 
 @api_view(['PUT'])
 def create_group(request):
     try:
         data = request.data
+        group_name = data['name'].strip().capitalize()
+        
+        
         if len(data['members']) < 2:
             return Response({"error": "Group should have at least 2 members"}, status=status.HTTP_400_BAD_REQUEST)
         
-        group = Group.objects.create(name=data['name'])
+        group = Group.objects.create(name=group_name)
         
         for name in data['members']:
-            person, created = Person.objects.get_or_create(name=name, group=group)
+            member_name = name.strip().capitalize()
+            person, created = Person.objects.get_or_create(name=member_name, group=group)
             group.members.add(person)
         group.save()
         
@@ -89,12 +93,9 @@ def list_group(request):
 @api_view(['GET'])
 def list_payment(request, pk):
     try:
-        payments = Payment.objects.filter(group=pk)
-        payers = payments.values_list('payer', flat=True).distinct()
-        payers = Person.objects.filter(id__in=payers)
-        serializer = PaymentSerializer(payments, many=True)
-        person_serializer = PersonSerializer(payers, many=True)
-        return Response({'payments': serializer.data, 'payers': person_serializer.data}, status=status.HTTP_201_CREATED)
+        payments = Payment.objects.filter(group=pk).order_by('-created_at')
+        serializer = PaymentListSerializer(payments, many=True)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     except Exception as e:
         print(e)
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -106,6 +107,45 @@ def delete_group(request, pk):
         group = Group.objects.get(id=pk)
         group.delete()
         return Response({"message": "Group deleted successfully"}, status=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['DELETE'])
+def delete_payment(request, pk):
+    try:
+        payment = Payment.objects.get(id=pk)
+        payment.delete()
+        return Response({"message": "Payment deleted successfully"}, status=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['PUT'])
+def update_group_name(request, pk):
+    try:
+        group = Group.objects.get(id=pk)
+        group.name = request.data['name']
+        group.save()
+        return Response({"message": "Group name updated successfully"}, status=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PUT'])
+def update_payment(request, pk):
+    try:
+        data = request.data
+        payment = Payment.objects.get(id=pk)
+        
+        if data['name'] != None:
+            payment.name = data['name']
+        
+        if data['amount'] != None:
+            payment.amount = data['amount']
+            
+        payment.save()
+        return Response({"message": "Payment updated successfully"}, status=status.HTTP_200_OK)
     except Exception as e:
         print(e)
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

@@ -1,7 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchGetGroup } from "@/features/GroupSlice";
+import {
+  fetchGetGroup,
+  resetGroupNameUpdate,
+  fetchGroupNameUpdate,
+} from "@/features/GroupSlice";
+import {
+  fetchListPayment,
+  fetchDeletePayment,
+  resetDeletePayment,
+} from "@/features/PaymentSlice";
+import calculateLiquidation from "@/features/CalculateLiquidation";
 import {
   Card,
   CardContent,
@@ -9,80 +19,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { fetchListPayment } from "@/features/PaymentSlice";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { AlignJustify } from "lucide-react";
-
-function calculateLiquidation(group, payment, payer) {
-  const numMembers = group.length;
-  const totalPayment = payment.reduce((acc, val) => acc + val, 0);
-  const sharePerMember = totalPayment / numMembers;
-
-  const balances = group.reduce((acc, member) => {
-    acc[member] = -sharePerMember;
-    return acc;
-  }, {});
-
-  payment.forEach((pay, index) => {
-    balances[payer[index]] += pay;
-  });
-
-  let creditors = Object.entries(balances)
-    .filter(([_, balance]) => balance > 0)
-    .reduce((acc, [member, balance]) => {
-      acc[member] = balance;
-      return acc;
-    }, {});
-
-  const debtors = Object.entries(balances)
-    .filter(([_, balance]) => balance < 0)
-    .reduce((acc, [member, balance]) => {
-      acc[member] = -balance;
-      return acc;
-    }, {});
-
-  const debtorMember = [];
-  const creditorMember = [];
-  const debtAmount = [];
-  const creditAmount = [];
-
-  for (const [debtor, debt] of Object.entries(debtors)) {
-    creditors = Object.entries(creditors)
-      .sort((a, b) => b[1] - a[1])
-      .reduce((acc, [member, balance]) => {
-        acc[member] = balance;
-        return acc;
-      }, {});
-
-    let remainingDebt = debt;
-    while (remainingDebt > 0) {
-      const [creditor, credit] = Object.entries(creditors)[0];
-      if (credit > remainingDebt) {
-        debtorMember.push(debtor);
-        creditorMember.push(creditor);
-        debtAmount.push(remainingDebt);
-        creditors[creditor] -= remainingDebt;
-        if (creditors[creditor] === 0) {
-          delete creditors[creditor];
-        }
-        remainingDebt = 0;
-      } else {
-        debtorMember.push(debtor);
-        creditorMember.push(creditor);
-        creditAmount.push(credit);
-        remainingDebt -= credit;
-        delete creditors[creditor];
-      }
-    }
-  }
-
-  const totalAmount = debtAmount.concat(creditAmount);
-  return {
-    debtor_member: debtorMember,
-    creditor_member: creditorMember,
-    total_amount: totalAmount,
-  };
-}
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { AlignJustify, Trash, Pencil, Check, X } from "lucide-react";
 
 function GroupDetails() {
   const { id } = useParams();
@@ -94,22 +43,77 @@ function GroupDetails() {
   const person = getGroup?.persons || [];
   const getGroupStatus = useSelector((state) => state.group.getGroupStatus);
   const paymentList = useSelector((state) => state.payment.paymentList) || [];
-  const payments = paymentList?.payments || [];
-  const payerList = paymentList?.payers || [];
   const paymentListStatus = useSelector(
     (state) => state.payment.paymentListStatus
   );
+  const deletePaymentStatus = useSelector(
+    (state) => state.payment.deletePaymentStatus
+  );
+  const groupNameUpdateStatus = useSelector(
+    (state) => state.group.groupNameUpdateStatus
+  );
 
-  const payer = payerList.map((p) => p.name);
-  const member = person.map((p) => p.name);
-  const amount = payments.map((p) => p.amount);
+  const payer = paymentList.map((p) => p.payer_name) || [];
+  const member = person.map((p) => p.name) || [];
+  const amount = paymentList.map((p) => p.amount) || [];
 
-  const liquidation = calculateLiquidation(member, amount, payer);
+  const [editMode, setEditMode] = useState(false);
+  const [editName, setEditName] = useState(group.name);
+  const [loading, setLoading] = useState(true);
+  const [liquidationAmount, setLiquidationAmount] = useState(null);
+
+  const creditorMember = liquidationAmount?.creditorMember || [];
+  const debtorMember = liquidationAmount?.debtorMember || [];
+  const totalAmount = liquidationAmount?.totalAmount || [];
+
+  let liquidation = {};
+  useEffect(() => {
+    if (
+      paymentListStatus === "succeeded" &&
+      payer.length > 0 &&
+      member.length > 0 &&
+      amount.length > 0
+    ) {
+      setLiquidationAmount(calculateLiquidation(member, amount, payer));
+      setLoading(false);
+    }
+  }, [paymentListStatus]);
 
   useEffect(() => {
     dispatch(fetchGetGroup(id));
     dispatch(fetchListPayment(id));
+    setEditName(group.name);
   }, [dispatch, id]);
+
+  useEffect(() => {
+    if (deletePaymentStatus === "succeeded") {
+      dispatch(fetchGetGroup(id));
+      dispatch(fetchListPayment(id));
+      dispatch(resetDeletePayment());
+      alert("Payment deleted successfully");
+    } else if (deletePaymentStatus === "failed") {
+      dispatch(resetDeletePayment());
+      alert("Payment deletion failed");
+    }
+  }, [deletePaymentStatus]);
+
+  useEffect(() => {
+    if (groupNameUpdateStatus === "succeeded") {
+      setEditMode(false);
+      dispatch(fetchGetGroup(id));
+      dispatch(fetchListPayment(id));
+      dispatch(resetGroupNameUpdate());
+      alert("Group name updated successfully");
+    } else if (groupNameUpdateStatus === "failed") {
+      dispatch(resetGroupNameUpdate());
+      alert("Group name update failed");
+    }
+  }, [groupNameUpdateStatus]);
+
+  const handleUpdateName = () => {
+    dispatch(fetchGroupNameUpdate({ id: id, name: editName }));
+  };
+
   return (
     <>
       {getGroupStatus === "loading" || getGroupStatus === "idle" ? (
@@ -117,10 +121,10 @@ function GroupDetails() {
       ) : getGroupStatus === "failed" ? (
         <p>Error</p>
       ) : (
-        <Card>
+        <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex justify-between">
-              <p className="text-base md:text-2xl font-bold ">Group Details</p>
+              <p className="text-lg md:text-2xl font-bold ">Group Details</p>
               <Button
                 variant="secondary"
                 onClick={() => navigate(`/payment/${id}`)}
@@ -131,17 +135,60 @@ function GroupDetails() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col">
-              <p>Name : {group.name}</p>
+              <div className="flex space-x-2  ">
+                {editMode ? (
+                  <>
+                    <Input
+                      id="name"
+                      type="text"
+                      value={editName || ""}
+                      placeholder="Enter group new name"
+                      onChange={(e) => setEditName(e.target.value)}
+                    />
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={handleUpdateName}
+                    >
+                      <Check />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setEditMode(false)}
+                    >
+                      <X className="h-4 w-4 md:h-auto md:w-auto" />
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-base md:text-xl font-semibold">
+                      Name : {group.name}
+                    </p>
+                    <span
+                      onClick={() => setEditMode(true)}
+                      className="hover:cursor-pointer"
+                    >
+                      <Pencil
+                        size={22}
+                        className="h-4 w-4 md:h-auto md:w-auto mt-1 md:mt-1.5"
+                      />
+                    </span>
+                  </>
+                )}
+              </div>
               <div className="flex flex-col">
-                <p className="mb-4">Members :</p>
-                <div className="flex">
+                <p className="text-base md:text-xl font-semibold mb-4">
+                  Members :
+                </p>
+                <div className="flex flex-wrap gap-3">
                   {person.map((p) => (
-                    <p
+                    <Badge
                       key={p.id}
-                      className="px-2 py-1 mx-2 bg-primary/70 rounded-lg"
+                      className="cursor-default hover:bg-primary md:text-sm"
                     >
                       {p.name}
-                    </p>
+                    </Badge>
                   ))}
                 </div>
               </div>
@@ -154,51 +201,100 @@ function GroupDetails() {
           ) : (
             <>
               <CardFooter>
-                {payments.length === 0 ? (
+                {paymentList.length === 0 ? (
                   <p>No payments found</p>
                 ) : (
                   <div className="flex flex-col w-full space-y-3">
                     <h2 className="text-base md:text-2xl font-bold text-center">
                       Payment List
                     </h2>
-                    {payments.map((p, index) => (
-                      <div
-                        key={index}
-                        className="flex justify-between bg-background p-2 rounded-lg"
-                      >
-                        <p>Name: {p.name}</p>
-                        <p>Amount: {p.amount}</p>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => navigate(`/payment/details/${p.id}`)}
-                        >
-                          <AlignJustify />
-                        </Button>
-                      </div>
-                    ))}
+                    <Table>
+                      <TableCaption>
+                        A list of your recent payment.
+                      </TableCaption>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[50%]">Name</TableHead>
+                          <TableHead className="text-right hidden sm:table-cell">
+                            Payer Name
+                          </TableHead>
+                          <TableHead className="text-right hidden sm:table-cell">
+                            Amount
+                          </TableHead>
+                          <TableHead className="text-right w-[10%]">
+                            Details
+                          </TableHead>
+                          <TableHead className="text-right w-[10%]">
+                            Delete
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {paymentList.map((p, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="md:text-base">
+                              {p.name}
+                            </TableCell>
+                            <TableCell className="text-right hidden sm:table-cell">
+                              {p.payer_name}
+                            </TableCell>
+                            <TableCell className="md:text-base text-right hidden sm:table-cell">
+                              ₹{p.amount}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  navigate(`/payment/details/${p.id}`)
+                                }
+                              >
+                                <AlignJustify className="h-4 w-4 md:h-auto md:w-auto" />
+                              </Button>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() =>
+                                  dispatch(fetchDeletePayment(p.id))
+                                }
+                              >
+                                <Trash className="h-4 w-4 md:h-auto md:w-auto" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 )}
               </CardFooter>
-              <CardFooter>
-                <div className="flex flex-col space-y-2 w-full">
-                  <h1 className="text-base md:text-xl font-semibold">
-                    How to liquidation
-                  </h1>
-                  {liquidation.creditor_member.map((person, index) => (
-                    <div key={index} className="flex justify-between">
-                      <>
-                        <p className="text-base md:text-xl">
-                          {liquidation.debtor_member[index]} {"->"} {person}
-                        </p>
-                        <p className="text-base md:text-xl">
-                          ₹{liquidation.total_amount[index]}
-                        </p>
-                      </>
-                    </div>
-                  ))}
-                </div>
-              </CardFooter>
+              {loading ? (
+                <p>Loading...</p>
+              ) : (
+                <>
+                  <h2 className="text-base md:text-2xl font-bold text-center my-4">
+                    Liquidation
+                  </h2>
+                  {liquidation && (
+                    <>
+                      {creditorMember.map((person, index) => (
+                        <div key={index} className="flex justify-between mx-8">
+                          <>
+                            <p className="text-base md:text-xl">
+                              {debtorMember[index]} {"->"} {person}
+                            </p>
+                            <p className="text-base md:text-xl">
+                              ₹{totalAmount[index]}
+                            </p>
+                          </>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </>
+              )}
             </>
           )}
         </Card>

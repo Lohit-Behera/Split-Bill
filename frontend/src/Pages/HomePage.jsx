@@ -8,6 +8,7 @@ import {
 } from "@/features/GroupSlice";
 import { Button } from "@/components/ui/button";
 import { AlignJustify, Trash } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +20,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 function HomePage() {
   const dispatch = useDispatch();
@@ -54,12 +61,34 @@ function HomePage() {
         {getGroupList.map((group, index) => (
           <div
             key={index}
-            className="flex justify-between bg-card p-2 rounded-lg"
+            className="flex justify-between bg-muted border-2 p-2 rounded-lg"
           >
-            <p className="text-base md:text-xl font-bold">{group.name}</p>
+            <div className="flex flex-col w-[50%]">
+              <p className="md:text-xl font-semibold">{group.name}</p>
+              <div className="md:flex flex-wrap gap-2 hidden ">
+                {group.members.map((member, index) => (
+                  <TooltipProvider key={index}>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Badge className={"hover:cursor-pointer"}>
+                          {member.name[0]}
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{member.name}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ))}
+              </div>
+            </div>
+            <div className="hidden md:flex flex-col font-semibold">
+              <p className="text-right">Total Amount</p>
+              <p className="text-center">₹{group.total_amount}</p>
+            </div>
             <div className="flex space-x-3">
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon"
                 onClick={() => navigate(`/group/${group.id}`)}
               >

@@ -10,4 +10,7 @@ urlpatterns = [
     path('payment/<str:pk>/', views.get_payment,name='get_payment'),
     path('list/payment/<str:pk>/', views.list_payment,name='list_payment'),
     path('delete/group/<str:pk>/', views.delete_group,name='delete_group'),
+    path('delete/payment/<str:pk>/', views.delete_payment,name='delete_payment'),
+    path('update/group/name/<str:pk>/', views.update_group_name,name='update_group_name'),
+    path('update/payment/<str:pk>/', views.update_payment,name='update_payment'),
 ]
