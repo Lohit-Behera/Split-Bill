@@ -18,6 +18,18 @@ class StandardResultsSetPagination(PageNumberPagination):
             'results': data
         })
 
+class StandardResultsSetPaginationGroupList(PageNumberPagination):
+    page_size = 8
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+    
+    def get_paginated_response(self, data):
+        return Response({
+            'total_pages': self.page.paginator.num_pages,
+            'current_page': self.page.number,
+            'results': data
+        })
+
 @api_view(['PUT'])
 def create_group(request):
     try:
@@ -96,9 +108,16 @@ def get_payment(request, pk):
 @api_view(['GET'])
 def list_group(request):
     try:
-        groups = Group.objects.all()
-        serializer = GroupListSerializer(groups, many=True)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        groups = Group.objects.all().order_by('-created_at')
+        paginator = StandardResultsSetPaginationGroupList()
+        result_page = paginator.paginate_queryset(groups, request)
+        serializer = GroupListSerializer(result_page, many=True)
+        response_data = {
+            'total_pages': paginator.page.paginator.num_pages,
+            'current_page': paginator.page.number,
+            'group_list': serializer.data
+        }
+        return Response(response_data, status=status.HTTP_201_CREATED)
     except Exception as e:
         print(e)
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

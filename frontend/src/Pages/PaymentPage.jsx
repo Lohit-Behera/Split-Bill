@@ -26,6 +26,8 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { fetchCreatePayment, resetPayment } from "@/features/PaymentSlice";
 import Loader from "@/components/Loader/Loader";
+import { toast } from "react-toastify";
+import ServerError from "@/components/ServerError";
 
 function PaymentPage() {
   const { id } = useParams();
@@ -51,7 +53,7 @@ function PaymentPage() {
       setPaymentFor([]);
       dispatch(resetPayment());
       navigate(`/payment/details/${payment.id}`);
-      alert("Payment created successfully");
+      toast.success("Payment created successfully");
     }
   }, [paymentStatus]);
 
@@ -75,11 +77,11 @@ function PaymentPage() {
 
   const handleSave = () => {
     if (selectedPayer === "" || paymentName === "") {
-      alert("Please fill in all the fields");
+      toast.warning("Please fill in all the fields");
     } else if (amount <= 0) {
-      alert("Amount must be greater than 0");
+      toast.warning("Amount must be greater than 0");
     } else if (paymentFor.length === 0) {
-      alert("Payment for cannot be empty");
+      toast.warning("Payment for cannot be empty");
     } else {
       dispatch(
         fetchCreatePayment({
@@ -98,7 +100,7 @@ function PaymentPage() {
       {getGroupStatus === "loading" || getGroupStatus === "idle" ? (
         <Loader />
       ) : getGroupStatus === "failed" ? (
-        <p>error</p>
+        <ServerError />
       ) : (
         <Card>
           <CardHeader>

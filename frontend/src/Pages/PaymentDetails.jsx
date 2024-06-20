@@ -26,6 +26,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Check, Pencil, X } from "lucide-react";
 import Loader from "@/components/Loader/Loader";
+import { toast } from "react-toastify";
+import ServerError from "@/components/ServerError";
 
 function PaymentDetails() {
   const { id } = useParams();
@@ -60,23 +62,23 @@ function PaymentDetails() {
       dispatch(resetUpdatePayment());
       setEditModeName(false);
       setEditModeAmount(false);
-      alert("Payment updated successfully");
+      toast.success("Payment updated successfully");
     } else if (updatePaymentStatus === "failed") {
-      alert("Payment update failed");
+      toast.error("Payment update failed");
     }
   }, [updatePaymentStatus]);
 
   const handleUpdateName = () => {
     if (editName === "") {
-      alert("Name cannot be empty");
+      toast.warning("Name cannot be empty");
     } else {
       dispatch(fetchUpdatePayment({ id: id, amount: null, name: editName }));
     }
   };
 
   const handleUpdateAmount = () => {
-    if (editAmount <= 0) {
-      alert("Amount must be greater than 0");
+    if (editAmount <= 0 || isNaN(editAmount)) {
+      toast.warning("Amount must be greater than 0");
     } else {
       dispatch(fetchUpdatePayment({ id: id, name: null, amount: editAmount }));
     }
@@ -86,7 +88,7 @@ function PaymentDetails() {
       {getPaymentStatus === "loading" || getPaymentStatus === "idle" ? (
         <Loader />
       ) : getPaymentStatus === "failed" ? (
-        <p>Error</p>
+        <ServerError />
       ) : (
         <Card className="mb-8">
           <CardHeader>

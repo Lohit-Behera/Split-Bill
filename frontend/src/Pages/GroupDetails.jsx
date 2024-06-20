@@ -52,6 +52,8 @@ import {
 } from "lucide-react";
 import Loader from "@/components/Loader/Loader";
 import LoaderSecondary from "@/components/Loader/LoaderSecondary";
+import { toast } from "react-toastify";
+import ServerError from "@/components/ServerError";
 
 function calculateLiquidation(group, payment, payer) {
   if (
@@ -176,7 +178,6 @@ function GroupDetails() {
       const payer = payments.liquidation.map((p) => p.payer.name) || [];
       const member = person.map((p) => p.name) || [];
       const amount = payments.liquidation.map((p) => p.amount) || [];
-      console.log(payer, member, amount);
       if (payer.length > 0 && member.length > 0 && amount.length > 0) {
         setLiquidationAmount(calculateLiquidation(member, amount, payer));
         setLoading(false);
@@ -194,12 +195,13 @@ function GroupDetails() {
 
   useEffect(() => {
     if (deletePaymentStatus === "succeeded") {
+      setPaymentList([]);
       dispatch(fetchListPayment({ id: id, page: "" }));
       dispatch(resetDeletePayment());
-      alert("Payment deleted successfully");
+      toast.success("Payment deleted successfully");
     } else if (deletePaymentStatus === "failed") {
       dispatch(resetDeletePayment());
-      alert("Payment deletion failed");
+      toast.error("Payment deletion failed");
     }
   }, [deletePaymentStatus]);
 
@@ -207,18 +209,19 @@ function GroupDetails() {
     if (groupNameUpdateStatus === "succeeded") {
       setEditMode(false);
       dispatch(fetchGetGroup(id));
+      setPaymentList([]);
       dispatch(fetchListPayment({ id: id, page: "" }));
       dispatch(resetGroupNameUpdate());
-      alert("Group name updated successfully");
+      toast.success("Group name updated successfully");
     } else if (groupNameUpdateStatus === "failed") {
       dispatch(resetGroupNameUpdate());
-      alert("Group name update failed");
+      toast.error("Group name update failed");
     }
   }, [groupNameUpdateStatus]);
 
   const handleUpdateName = () => {
     if (editName === "") {
-      alert("Name cannot be empty");
+      toast.warning("Name cannot be empty");
     } else {
       dispatch(fetchGroupNameUpdate({ id: id, name: editName }));
     }
@@ -234,7 +237,7 @@ function GroupDetails() {
       {getGroupStatus === "loading" || getGroupStatus === "idle" ? (
         <Loader className="min-h-[80vh]" />
       ) : getGroupStatus === "failed" ? (
-        <p>Error</p>
+        <ServerError />
       ) : (
         <Card className="mb-8">
           <CardHeader>
@@ -314,7 +317,7 @@ function GroupDetails() {
           {paymentListStatus === "loading" || paymentListStatus === "idle" ? (
             <LoaderSecondary className="min-h-96" />
           ) : paymentListStatus === "failed" ? (
-            <p>Error</p>
+            <ServerError />
           ) : (
             <CardFooter>
               <div className="w-full">

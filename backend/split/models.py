@@ -11,6 +11,7 @@ class Person(models.Model):
 class Group(models.Model):
     name = models.CharField(max_length=200)
     members = models.ManyToManyField(Person)
+    created_at = models.DateTimeField(auto_now_add=True)
     
 
     def __str__(self):

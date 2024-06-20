@@ -41,9 +41,9 @@ export const fetchGetGroup = createAsyncThunk('group/fetchGetGroup', async (id, 
     }
 })
 
-export const fetchGroupList = createAsyncThunk('group/fetchGroupList', async (data, {rejectWithValue}) => {
+export const fetchGroupList = createAsyncThunk('group/fetchGroupList', async (keyword = '', {rejectWithValue}) => {
     try {
-        const response = await fetch('/api/group/list/', {
+        const response = await fetch(`/api/group/list/${keyword}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { SquarePlus, X } from "lucide-react";
+import { toast } from "react-toastify";
 
 function GroupPage() {
   const dispatch = useDispatch();
@@ -35,17 +36,17 @@ function GroupPage() {
       setPerson("");
       dispatch(resetGroup());
       navigate(`/group/${groupDetails.id}`);
-      alert("Group created successfully");
+      toast.success("Group created successfully");
     } else if (groupStatus === "failed") {
-      alert("Group creation failed");
+      toast.error("Group creation failed");
     }
   }, [groupStatus, group, navigate]);
 
   const handleMembers = () => {
     if (person === "") {
-      alert("Please enter a name");
+      toast.warning("Please enter a name");
     } else if (members.includes(person)) {
-      alert("Name already exists");
+      toast.warning("Name already exists");
     } else {
       setMembers([...members, person]);
       setPerson("");
@@ -54,9 +55,9 @@ function GroupPage() {
 
   const handleCreateGroup = () => {
     if (name === "") {
-      alert("Please enter a name");
+      toast.warning("Please enter a name");
     } else if (members.length < 2) {
-      alert("Please add members");
+      toast.warning("Please add members");
     } else {
       dispatch(
         fetchGroupCreate({
