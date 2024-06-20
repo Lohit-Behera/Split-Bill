@@ -33,3 +33,15 @@ class PaymentListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
         fields = ['id', 'name', 'payer_name', 'amount', 'created_at']
+        
+class PersonNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Person
+        fields = ['name']
+
+class ForLiquidationSerializer(serializers.ModelSerializer):
+    payer = PersonNameSerializer()
+    
+    class Meta:
+        model = Payment
+        fields = ['payer', 'amount']

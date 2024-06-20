@@ -25,6 +25,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { fetchCreatePayment, resetPayment } from "@/features/PaymentSlice";
+import Loader from "@/components/Loader/Loader";
 
 function PaymentPage() {
   const { id } = useParams();
@@ -95,7 +96,7 @@ function PaymentPage() {
   return (
     <>
       {getGroupStatus === "loading" || getGroupStatus === "idle" ? (
-        <div>Loading...</div>
+        <Loader />
       ) : getGroupStatus === "failed" ? (
         <p>error</p>
       ) : (

@@ -41,13 +41,14 @@ export const fetchGetPayment = createAsyncThunk('payment/fetchGetPayment', async
     }
 })
 
-export const fetchListPayment = createAsyncThunk('payment/fetchListPayment', async (id, {rejectWithValue}) => {
+export const fetchListPayment = createAsyncThunk('payment/fetchListPayment', async (data, {rejectWithValue}) => {
     try {
-        const response = await fetch(`/api/list/payment/${id}/`, {
+        const response = await fetch(`/api/list/payment/${data.id}/${data.page}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
             },
+            data
         });
         if (!response.ok) {
             const errorData = await response.json();

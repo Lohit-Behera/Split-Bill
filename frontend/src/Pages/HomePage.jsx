@@ -26,6 +26,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import Loader from "@/components/Loader/Loader";
+import LoaderSecondary from "@/components/Loader/LoaderSecondary";
 
 function HomePage() {
   const dispatch = useDispatch();

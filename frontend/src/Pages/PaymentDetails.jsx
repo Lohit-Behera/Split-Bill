@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Check, Pencil, X } from "lucide-react";
+import Loader from "@/components/Loader/Loader";
 
 function PaymentDetails() {
   const { id } = useParams();
@@ -83,11 +84,11 @@ function PaymentDetails() {
   return (
     <>
       {getPaymentStatus === "loading" || getPaymentStatus === "idle" ? (
-        <p>Loading...</p>
+        <Loader />
       ) : getPaymentStatus === "failed" ? (
         <p>Error</p>
       ) : (
-        <Card>
+        <Card className="mb-8">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-center">
               Payment Details
@@ -95,23 +96,34 @@ function PaymentDetails() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between">
-              <div className="flex space-x-2 ">
+              <div className="flex gap-1 md:gap-4 justify-start w-[50%]">
                 {editModeName ? (
-                  <>
+                  <div className="flex flex-col items-start gap-1 md:gap-2 w-full">
                     <Input
                       id="name"
                       type="text"
                       value={editName || ""}
                       placeholder="Enter new payment name"
                       onChange={(e) => setEditName(e.target.value)}
+                      className="w-[90%]"
                     />
-                    <Button size="icon" variant="outline">
-                      <Check onClick={handleUpdateName} />
-                    </Button>
-                    <Button size="icon" variant="outline">
-                      <X onClick={() => setEditModeName(false)} />
-                    </Button>
-                  </>
+                    <div className="space-x-1 md:space-x-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleUpdateName}
+                      >
+                        <Check className="h-4 w-4 md:h-auto md:w-auto" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditModeName(false)}
+                      >
+                        <X className="h-4 w-4 md:h-auto md:w-auto" />
+                      </Button>
+                    </div>
+                  </div>
                 ) : (
                   <>
                     <div className="flex flex-col">
@@ -133,23 +145,34 @@ function PaymentDetails() {
                   </>
                 )}
               </div>
-              <div className="flex space-x-2 ">
+              <div className="flex gap-1 md:gap-4 justify-end w-[50%]">
                 {editModeAmount ? (
-                  <>
+                  <div className="flex flex-col items-end gap-1 md:gap-2 w-full">
                     <Input
                       id="name"
                       type="number"
-                      value={editAmount || 0}
+                      value={editAmount || ""}
                       onChange={(e) => setEditAmount(e.target.value)}
                       placeholder="Enter new amount"
+                      className="w-[90%] md:text-base [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
-                    <Button size="icon" variant="outline">
-                      <Check onClick={handleUpdateAmount} />
-                    </Button>
-                    <Button size="icon" variant="outline">
-                      <X onClick={() => setEditModeAmount(false)} />
-                    </Button>
-                  </>
+                    <div className="space-x-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleUpdateAmount}
+                      >
+                        <Check className="h-4 w-4 md:h-auto md:w-auto" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditModeAmount(false)}
+                      >
+                        <X className="h-4 w-4 md:h-auto md:w-auto" />
+                      </Button>
+                    </div>
+                  </div>
                 ) : (
                   <>
                     <div className="flex flex-col">
@@ -176,7 +199,7 @@ function PaymentDetails() {
                   <Tooltip>
                     <TooltipTrigger>
                       <Badge className={"hover:cursor-pointer"}>
-                        {person.name[0].toUpperCase() + person.name.slice(1)}
+                        {person.name}
                       </Badge>
                     </TooltipTrigger>
                     <TooltipContent>

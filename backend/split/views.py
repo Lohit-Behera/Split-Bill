@@ -1,9 +1,22 @@
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 
 from .models import Group, Payment, Person
-from .serializers import GroupSerializer, PaymentSerializer, PersonSerializer, PaymentDetailsSerializer, GroupListSerializer, PaymentListSerializer
+from .serializers import GroupSerializer, PaymentSerializer, PersonSerializer, PaymentDetailsSerializer, GroupListSerializer, PaymentListSerializer,ForLiquidationSerializer
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 5
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+    
+    def get_paginated_response(self, data):
+        return Response({
+            'total_pages': self.page.paginator.num_pages,
+            'current_page': self.page.number,
+            'results': data
+        })
 
 @api_view(['PUT'])
 def create_group(request):
@@ -94,11 +107,22 @@ def list_group(request):
 def list_payment(request, pk):
     try:
         payments = Payment.objects.filter(group=pk).order_by('-created_at')
-        serializer = PaymentListSerializer(payments, many=True)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        liquidation = ForLiquidationSerializer(payments, many=True)
+        paginator = StandardResultsSetPagination()
+        result_page = paginator.paginate_queryset(payments, request)
+        serializer = PaymentListSerializer(result_page, many=True)
+        response_data = {
+            'total_pages': paginator.page.paginator.num_pages,
+            'current_page': paginator.page.number,
+            'liquidation': liquidation.data,
+            'results': serializer.data
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
     except Exception as e:
         print(e)
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
     
 
 @api_view(['DELETE'])
