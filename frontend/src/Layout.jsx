@@ -37,7 +37,6 @@ function Layout() {
       <div className="absolute inset-0 w-full h-full overflow-hidden object-cover -z-10">
         <div className="w-full mx-auto rounded-md fixed inset-0 h-full overflow-hidden">
           <ShaderGradientCanvas
-            importedFiber={{ ...fiber, ...drei, ...reactSpring }}
             style={{
               position: "absolute",
               top: 0,

@@ -35,7 +35,6 @@ function HomePage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   let keyword = useLocation().search;
-  console.log(keyword);
 
   const getGroupList = useSelector((state) => state.group.getGroupList) || [];
   const groupList = getGroupList?.group_list || [];
