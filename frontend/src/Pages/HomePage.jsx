@@ -80,7 +80,7 @@ function HomePage() {
             {groupList.map((group, index) => (
               <div
                 key={index}
-                className="flex justify-between bg-muted border-2 p-2 rounded-lg"
+                className="flex justify-between bg-background border-2 p-2 rounded-lg"
               >
                 <div className="flex flex-col w-[50%]">
                   <p className="md:text-xl font-semibold">{group.name}</p>

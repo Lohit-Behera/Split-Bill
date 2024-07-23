@@ -7,8 +7,8 @@ import DarkModeToggle from "./DarkModeToggle";
 
 function Header() {
   return (
-    <nav className="z-20 w-full sticky top-0 mb-2 backdrop-blur bg-background/50 mt-1.5">
-      <ul className="flex justify-between space-x-3">
+    <nav className="z-20 w-full sticky top-0 mb-6 backdrop-blur bg-background/50 mt-1.5 rounded-full p-1 md:p-2">
+      <ul className="flex justify-between space-x-3 md:w-[98%] mx-auto">
         <li>
           <Link to={"/"}>
             <img className="h-12 w-12" src={Logo} alt="Logo" />
