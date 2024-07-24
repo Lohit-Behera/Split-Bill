@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { SquarePlus, X } from "lucide-react";
 import { toast } from "react-toastify";
+import Loader from "@/components/Loader/Loader";
 
 function GroupPage() {
   const dispatch = useDispatch();
@@ -28,6 +29,7 @@ function GroupPage() {
   const [name, setName] = useState("");
   const [members, setMembers] = useState([]);
   const [person, setPerson] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (groupStatus === "succeeded") {
@@ -36,6 +38,7 @@ function GroupPage() {
       setPerson("");
       dispatch(resetGroup());
       navigate(`/group/${groupDetails.id}`);
+      setLoading(false);
       toast.success("Group created successfully");
     } else if (groupStatus === "failed") {
       toast.error("Group creation failed");
@@ -59,6 +62,7 @@ function GroupPage() {
     } else if (members.length < 2) {
       toast.warning("Please add members");
     } else {
+      setLoading(true);
       dispatch(
         fetchGroupCreate({
           name: name,
@@ -69,76 +73,80 @@ function GroupPage() {
   };
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">
-            Create Group
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-2">
-            <Label htmlFor="group-name">Group Name</Label>
-            <Input
-              id="group-name"
-              type="name"
-              placeholder="Group Name"
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="members">Members Names</Label>
-            <div className="flex">
+      {loading ? (
+        <Loader />
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-center">
+              Create Group
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="group-name">Group Name</Label>
               <Input
-                id="members"
+                id="group-name"
                 type="name"
-                placeholder="Members Names"
+                placeholder="Group Name"
+                onChange={(e) => setName(e.target.value)}
                 required
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleMembers();
-                }}
-                onChange={(e) => setPerson(e.target.value)}
-                value={person}
-                className="mr-2"
               />
-              <Button variant="ghost" size="icon" onClick={handleMembers}>
-                <SquarePlus />
-              </Button>
             </div>
-          </div>
-          {members.length > 0 && (
-            <>
-              <p className="text-sm">Members:</p>
-              <div className="flex flex-wrap gap-4">
-                {members.map((member, index) => (
-                  <div key={index}>
-                    <p className=" flex bg-secondary p-2 rounded-lg">
-                      {member}
-                      <span
-                        className="ml-2 mt-1.5 hover:cursor-pointer"
-                        onClick={() =>
-                          setMembers(members.filter((m) => m !== member))
-                        }
-                      >
-                        <X size={15} />
-                      </span>
-                    </p>
-                  </div>
-                ))}
+            <div className="grid gap-2">
+              <Label htmlFor="members">Members Names</Label>
+              <div className="flex">
+                <Input
+                  id="members"
+                  type="name"
+                  placeholder="Members Names"
+                  required
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleMembers();
+                  }}
+                  onChange={(e) => setPerson(e.target.value)}
+                  value={person}
+                  className="mr-2"
+                />
+                <Button variant="ghost" size="icon" onClick={handleMembers}>
+                  <SquarePlus />
+                </Button>
               </div>
-            </>
-          )}
-        </CardContent>
-        <CardFooter>
-          <Button
-            variant="default"
-            className="w-full"
-            onClick={handleCreateGroup}
-          >
-            Create
-          </Button>
-        </CardFooter>
-      </Card>
+            </div>
+            {members.length > 0 && (
+              <>
+                <p className="text-sm">Members:</p>
+                <div className="flex flex-wrap gap-4">
+                  {members.map((member, index) => (
+                    <div key={index}>
+                      <p className=" flex bg-secondary p-2 rounded-lg">
+                        {member}
+                        <span
+                          className="ml-2 mt-1.5 hover:cursor-pointer"
+                          onClick={() =>
+                            setMembers(members.filter((m) => m !== member))
+                          }
+                        >
+                          <X size={15} />
+                        </span>
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </CardContent>
+          <CardFooter>
+            <Button
+              variant="default"
+              className="w-full"
+              onClick={handleCreateGroup}
+            >
+              Create
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
     </>
   );
 }

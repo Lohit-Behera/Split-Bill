@@ -6,7 +6,6 @@ import { fetchGetGroup } from "@/features/GroupSlice";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -44,6 +43,7 @@ function PaymentPage() {
   const [paymentName, setPaymentName] = useState("");
   const [amount, setAmount] = useState(0);
   const [paymentFor, setPaymentFor] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (paymentStatus === "succeeded") {
@@ -53,6 +53,7 @@ function PaymentPage() {
       setPaymentFor([]);
       dispatch(resetPayment());
       navigate(`/payment/details/${payment.id}`);
+      setLoading(false);
       toast.success("Payment created successfully");
     }
   }, [paymentStatus]);
@@ -83,6 +84,7 @@ function PaymentPage() {
     } else if (paymentFor.length === 0) {
       toast.warning("Payment for cannot be empty");
     } else {
+      setLoading(true);
       dispatch(
         fetchCreatePayment({
           id: id,
@@ -97,7 +99,7 @@ function PaymentPage() {
 
   return (
     <>
-      {getGroupStatus === "loading" || getGroupStatus === "idle" ? (
+      {getGroupStatus === "loading" || getGroupStatus === "idle" || loading ? (
         <Loader />
       ) : getGroupStatus === "failed" ? (
         <ServerError />

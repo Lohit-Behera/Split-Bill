@@ -148,6 +148,9 @@ def list_payment(request, pk):
 def delete_group(request, pk):
     try:
         group = Group.objects.get(id=pk)
+        person = group.members.all()
+        for p in person:
+            p.delete()
         group.delete()
         return Response({"message": "Group deleted successfully"}, status=status.HTTP_200_OK)
     except Exception as e:

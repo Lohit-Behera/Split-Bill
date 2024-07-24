@@ -33,8 +33,8 @@ function Layout() {
     setIsDarkMode(theme === "dark");
   }, [mode]);
   return (
-    <div className="w-full min-h-[100vh]">
-      <div className="absolute inset-0 w-full h-full overflow-hidden object-cover -z-10">
+    <div className="w-full h-full">
+      <div className="fixed inset-0 w-full h-full overflow-hidden object-cover -z-10 ">
         <div className="w-full mx-auto rounded-md fixed inset-0 h-full overflow-hidden">
           <ShaderGradientCanvas
             style={{
@@ -49,7 +49,7 @@ function Layout() {
           </ShaderGradientCanvas>
         </div>
       </div>
-      <div className="w-full md:w-[85%] lg:w-[80%] h-full mx-auto p-1 md:p-6 bg-background/60 backdrop-blur ">
+      <div className="w-full md:w-[85%] lg:w-[80%] min-h-[80vh] mx-auto p-1 md:p-6 bg-background/60 backdrop-blur">
         <Header />
         <ErrorBoundary FallbackComponent={FallBack}>
           <ScrollRestoration />
