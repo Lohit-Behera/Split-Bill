@@ -66,7 +66,7 @@ def get_group(request, pk):
         group = Group.objects.get(id=pk)
         serializer = GroupSerializer(group, many=False)
         persons_serializer = PersonSerializer(group.members, many=True)
-        return Response({'group':serializer.data, 'persons':persons_serializer.data}, status=status.HTTP_201_CREATED)
+        return Response({'group':serializer.data, 'persons':persons_serializer.data}, status=status.HTTP_200_OK)
     except Exception as e:
         print(e)
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -100,7 +100,7 @@ def get_payment(request, pk):
         payment_for = PersonSerializer(payment_for, many=True).data
         payer = PersonSerializer(payer, many=False).data
         payment_details = PaymentDetailsSerializer(payment, many=False).data
-        return Response({'payment_for':payment_for, 'payer':payer, 'split_amount':round(split_amount, 2), 'payment_details': payment_details}, status=status.HTTP_201_CREATED)
+        return Response({'payment_for':payment_for, 'payer':payer, 'split_amount':round(split_amount, 2), 'payment_details': payment_details}, status=status.HTTP_200_OK)
     except Exception as e:
         print(e)
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -117,7 +117,7 @@ def list_group(request):
             'current_page': paginator.page.number,
             'group_list': serializer.data
         }
-        return Response(response_data, status=status.HTTP_201_CREATED)
+        return Response(response_data, status=status.HTTP_200_OK)
     except Exception as e:
         print(e)
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

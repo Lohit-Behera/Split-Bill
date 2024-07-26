@@ -1,8 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { baseUrl } from "./Proxy";
 
 export const fetchCreatePayment = createAsyncThunk('payment/fetchCreatePayment', async (data, {rejectWithValue}) => {
     try {
-        const response = await fetch(`/api/create/payment/${data.id}/`, {
+        const response = await fetch(`${baseUrl}/api/create/payment/${data.id}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -23,7 +24,7 @@ export const fetchCreatePayment = createAsyncThunk('payment/fetchCreatePayment',
 
 export const fetchGetPayment = createAsyncThunk('payment/fetchGetPayment', async (id, {rejectWithValue}) => {
     try {
-        const response = await fetch(`/api/payment/${id}/`, {
+        const response = await fetch(`${baseUrl}/api/payment/${id}/`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -43,7 +44,7 @@ export const fetchGetPayment = createAsyncThunk('payment/fetchGetPayment', async
 
 export const fetchListPayment = createAsyncThunk('payment/fetchListPayment', async (data, {rejectWithValue}) => {
     try {
-        const response = await fetch(`/api/list/payment/${data.id}/${data.page}`, {
+        const response = await fetch(`${baseUrl}/api/list/payment/${data.id}/${data.page}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -64,7 +65,7 @@ export const fetchListPayment = createAsyncThunk('payment/fetchListPayment', asy
 
 export const fetchDeletePayment = createAsyncThunk('payment/delete=', async (id, {rejectWithValue}) => {
     try {
-        const response = await fetch(`/api/delete/payment/${id}/`, {
+        const response = await fetch(`${baseUrl}/api/delete/payment/${id}/`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -84,7 +85,7 @@ export const fetchDeletePayment = createAsyncThunk('payment/delete=', async (id,
 
 export const fetchUpdatePayment = createAsyncThunk('payment/update', async (data, {rejectWithValue}) => {
     try {
-        const response = await fetch(`/api/update/payment/${data.id}/`, {
+        const response = await fetch(`${baseUrl}/api/update/payment/${data.id}/`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

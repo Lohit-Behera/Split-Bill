@@ -1,8 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { baseUrl } from "./Proxy";
 
 export const fetchGroupCreate = createAsyncThunk('group/fetchGroupCreate', async (data, {rejectWithValue}) => {
     try {
-        const response = await fetch('/api/group/create/', {
+        const response = await fetch(`${baseUrl}/api/group/create/`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -23,7 +24,7 @@ export const fetchGroupCreate = createAsyncThunk('group/fetchGroupCreate', async
 
 export const fetchGetGroup = createAsyncThunk('group/fetchGetGroup', async (id, {rejectWithValue}) => {
     try {
-        const response = await fetch(`/api/group/${id}/`, {
+        const response = await fetch(`${baseUrl}/api/group/${id}/`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -43,7 +44,7 @@ export const fetchGetGroup = createAsyncThunk('group/fetchGetGroup', async (id, 
 
 export const fetchGroupList = createAsyncThunk('group/fetchGroupList', async (keyword = '', {rejectWithValue}) => {
     try {
-        const response = await fetch(`/api/group/list/${keyword}`, {
+        const response = await fetch(`${baseUrl}/api/group/list/${keyword}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -63,7 +64,7 @@ export const fetchGroupList = createAsyncThunk('group/fetchGroupList', async (ke
 
 export const fetchGroupDelete = createAsyncThunk('group/fetchGroupDelete', async (id, {rejectWithValue}) => {
     try {
-        const response = await fetch(`/api/delete/group/${id}/`, {
+        const response = await fetch(`${baseUrl}/api/delete/group/${id}/`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -83,7 +84,7 @@ export const fetchGroupDelete = createAsyncThunk('group/fetchGroupDelete', async
 
 export const fetchGroupNameUpdate = createAsyncThunk('group/name/update', async (data, {rejectWithValue}) => {
     try {
-        const response = await fetch(`/api/update/group/name/${data.id}/`, {
+        const response = await fetch(`${baseUrl}/api/update/group/name/${data.id}/`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
