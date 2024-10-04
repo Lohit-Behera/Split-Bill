@@ -52,7 +52,7 @@ import {
 } from "lucide-react";
 import Loader from "@/components/Loader/Loader";
 import LoaderSecondary from "@/components/Loader/LoaderSecondary";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import ServerError from "@/components/ServerError";
 
 function calculateLiquidation(group, payment, payer) {
@@ -198,10 +198,8 @@ function GroupDetails() {
       setPaymentList([]);
       dispatch(fetchListPayment({ id: id, page: "" }));
       dispatch(resetDeletePayment());
-      toast.success("Payment deleted successfully");
     } else if (deletePaymentStatus === "failed") {
       dispatch(resetDeletePayment());
-      toast.error("Payment deletion failed");
     }
   }, [deletePaymentStatus]);
 
@@ -212,10 +210,8 @@ function GroupDetails() {
       setPaymentList([]);
       dispatch(fetchListPayment({ id: id, page: "" }));
       dispatch(resetGroupNameUpdate());
-      toast.success("Group name updated successfully");
     } else if (groupNameUpdateStatus === "failed") {
       dispatch(resetGroupNameUpdate());
-      toast.error("Group name update failed");
     }
   }, [groupNameUpdateStatus]);
 
@@ -223,13 +219,29 @@ function GroupDetails() {
     if (editName === "") {
       toast.warning("Name cannot be empty");
     } else {
-      dispatch(fetchGroupNameUpdate({ id: id, name: editName }));
+      const nameUpdatePromise = dispatch(
+        fetchGroupNameUpdate({ id: id, name: editName })
+      ).unwrap();
+      toast.promise(nameUpdatePromise, {
+        loading: "Updating group name...",
+        success: "Group name updated successfully",
+        error: "Something went wrong",
+      });
     }
   };
 
   const handleShowLess = () => {
     dispatch(fetchListPayment({ id: id, page: "" }));
     setPaymentList([]);
+  };
+
+  const handleDeletePayment = (id) => {
+    const deletePromise = dispatch(fetchDeletePayment(id)).unwrap();
+    toast.promise(deletePromise, {
+      loading: "Deleting payment...",
+      success: "Payment deleted successfully",
+      error: "Something went wrong",
+    });
   };
 
   return (
@@ -420,7 +432,7 @@ function GroupDetails() {
                                       <AlertDialogAction
                                         className="bg-destructive text-destructive-foreground hover:bg-destructive/70"
                                         onClick={() =>
-                                          dispatch(fetchDeletePayment(p.id))
+                                          handleDeletePayment(p.id)
                                         }
                                       >
                                         Delete

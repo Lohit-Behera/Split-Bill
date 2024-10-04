@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { fetchCreatePayment, resetPayment } from "@/features/PaymentSlice";
 import Loader from "@/components/Loader/Loader";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import ServerError from "@/components/ServerError";
 
 function PaymentPage() {
@@ -54,7 +54,8 @@ function PaymentPage() {
       dispatch(resetPayment());
       navigate(`/payment/details/${payment.id}`);
       setLoading(false);
-      toast.success("Payment created successfully");
+    } else if (paymentStatus === "failed") {
+      setLoading(false);
     }
   }, [paymentStatus]);
 
@@ -85,7 +86,7 @@ function PaymentPage() {
       toast.warning("Payment for cannot be empty");
     } else {
       setLoading(true);
-      dispatch(
+      const createPromise = dispatch(
         fetchCreatePayment({
           id: id,
           payer: selectedPayer,
@@ -93,7 +94,12 @@ function PaymentPage() {
           amount: amount,
           payment_for: paymentFor,
         })
-      );
+      ).unwrap();
+      toast.promise(createPromise, {
+        loading: "Creating payment...",
+        success: "Payment created successfully",
+        error: "Something went wrong",
+      });
     }
   };
 

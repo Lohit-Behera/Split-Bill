@@ -1,42 +1,31 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 import { baseUrl } from "./Proxy";
 
-export const fetchGroupCreate = createAsyncThunk('group/fetchGroupCreate', async (data, {rejectWithValue}) => {
+export const fetchGroupCreate = createAsyncThunk('group/fetchGroupCreate', async (groupData, {rejectWithValue}) => {
     try {
-        const response = await fetch(`${baseUrl}/api/group/create/`, {
-            method: 'PUT',
+        const config = {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data),
-        });
-        if (!response.ok) {
-            const errorData = await response.json();
-            return rejectWithValue(errorData);
         }
 
-        const result = await response.json();
+        const { data: result } = await axios.put(`${baseUrl}/api/group/create/`, groupData, config);
         return result;
     } catch (error) {
         return rejectWithValue(error.message);
     }
 })
-
+  
 export const fetchGetGroup = createAsyncThunk('group/fetchGetGroup', async (id, {rejectWithValue}) => {
     try {
-        const response = await fetch(`${baseUrl}/api/group/${id}/`, {
-            method: 'GET',
+        const config = {
             headers: {
                 'Content-Type': 'application/json',
             },
-        });
-        if (!response.ok) {
-            const errorData = await response.json();
-            return rejectWithValue(errorData);
         }
-
-        const result = await response.json();
-        return result;
+        const { data } = await axios.get(`${baseUrl}/api/group/${id}/`, config);
+        return data;
     } catch (error) {
         return rejectWithValue(error.message);
     }
@@ -44,19 +33,13 @@ export const fetchGetGroup = createAsyncThunk('group/fetchGetGroup', async (id, 
 
 export const fetchGroupList = createAsyncThunk('group/fetchGroupList', async (keyword = '', {rejectWithValue}) => {
     try {
-        const response = await fetch(`${baseUrl}/api/group/list/${keyword}`, {
-            method: 'GET',
+        const config = {
             headers: {
                 'Content-Type': 'application/json',
             },
-        });
-        if (!response.ok) {
-            const errorData = await response.json();
-            return rejectWithValue(errorData);
         }
-
-        const result = await response.json();
-        return result;
+        const { data } = await axios.get(`${baseUrl}/api/group/list/${keyword}`, config);
+        return data;
     } catch (error) {
         return rejectWithValue(error.message);
     }
@@ -64,45 +47,32 @@ export const fetchGroupList = createAsyncThunk('group/fetchGroupList', async (ke
 
 export const fetchGroupDelete = createAsyncThunk('group/fetchGroupDelete', async (id, {rejectWithValue}) => {
     try {
-        const response = await fetch(`${baseUrl}/api/delete/group/${id}/`, {
-            method: 'DELETE',
+        const config = {
             headers: {
                 'Content-Type': 'application/json',
             },
-        });
-        if (!response.ok) {
-            const errorData = await response.json();
-            return rejectWithValue(errorData);
         }
 
-        const result = await response.json();
-        return result;
+        const { data } = await axios.delete(`${baseUrl}/api/delete/group/${id}/`, config);
+        return data;
     } catch (error) {
         return rejectWithValue(error.message);
     }
 })
 
-export const fetchGroupNameUpdate = createAsyncThunk('group/name/update', async (data, {rejectWithValue}) => {
+export const fetchGroupNameUpdate = createAsyncThunk('group/name/update', async (groupData, {rejectWithValue}) => {
     try {
-        const response = await fetch(`${baseUrl}/api/update/group/name/${data.id}/`, {
-            method: 'PUT',
+        const config = {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data),
-        });
-        if (!response.ok) {
-            const errorData = await response.json();
-            return rejectWithValue(errorData);
         }
-
-        const result = await response.json();
-        return result;
+        const { data } = await axios.put(`${baseUrl}/api/update/group/name/${groupData.id}/`, groupData, config);
+        return groupData;
     } catch (error) {
         return rejectWithValue(error.message);
     }
 })
-
 
 const groupSlice = createSlice({
     name: 'group',

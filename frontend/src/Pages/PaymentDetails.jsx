@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Check, Pencil, X } from "lucide-react";
 import Loader from "@/components/Loader/Loader";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import ServerError from "@/components/ServerError";
 
 function PaymentDetails() {
@@ -61,9 +61,8 @@ function PaymentDetails() {
       dispatch(resetUpdatePayment());
       setEditModeName(false);
       setEditModeAmount(false);
-      toast.success("Payment updated successfully");
     } else if (updatePaymentStatus === "failed") {
-      toast.error("Payment update failed");
+      dispatch(resetUpdatePayment());
     }
   }, [updatePaymentStatus]);
 
@@ -71,7 +70,14 @@ function PaymentDetails() {
     if (editName === "") {
       toast.warning("Name cannot be empty");
     } else {
-      dispatch(fetchUpdatePayment({ id: id, amount: null, name: editName }));
+      const nameUpdatePromise = dispatch(
+        fetchUpdatePayment({ id: id, amount: null, name: editName })
+      ).unwrap();
+      toast.promise(nameUpdatePromise, {
+        loading: "Updating payment name...",
+        success: "Payment name updated successfully",
+        error: "Something went wrong",
+      });
     }
   };
 
@@ -79,7 +85,14 @@ function PaymentDetails() {
     if (editAmount <= 0 || isNaN(editAmount)) {
       toast.warning("Amount must be greater than 0");
     } else {
-      dispatch(fetchUpdatePayment({ id: id, name: null, amount: editAmount }));
+      const amountUpdatePromise = dispatch(
+        fetchUpdatePayment({ id: id, name: null, amount: editAmount })
+      ).unwrap();
+      toast.promise(amountUpdatePromise, {
+        loading: "Updating payment amount...",
+        success: "Payment amount updated successfully",
+        error: "Something went wrong",
+      });
     }
   };
   return (

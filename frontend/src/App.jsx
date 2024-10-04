@@ -5,9 +5,7 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
 } from "react-router-dom";
-import { ToastContainer, Slide } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-
+import { Toaster } from "@/components/ui/sonner";
 import Layout from "./Layout";
 import HomePage from "./Pages/HomePage";
 import PaymentPage from "./Pages/PaymentPage";
@@ -33,20 +31,7 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <RouterProvider router={router}></RouterProvider>
-      <ToastContainer
-        stacked
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover={false}
-        theme={"colored"}
-        transition={Slide}
-      />
+      <Toaster richColors />
     </ThemeProvider>
   );
 }

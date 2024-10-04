@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { SquarePlus, X } from "lucide-react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import Loader from "@/components/Loader/Loader";
 
 function GroupPage() {
@@ -39,9 +39,8 @@ function GroupPage() {
       dispatch(resetGroup());
       navigate(`/group/${groupDetails.id}`);
       setLoading(false);
-      toast.success("Group created successfully");
     } else if (groupStatus === "failed") {
-      toast.error("Group creation failed");
+      setLoading(false);
     }
   }, [groupStatus, group, navigate]);
 
@@ -63,12 +62,17 @@ function GroupPage() {
       toast.warning("Please add members");
     } else {
       setLoading(true);
-      dispatch(
+      const createPromise = dispatch(
         fetchGroupCreate({
           name: name,
           members: members,
         })
-      );
+      ).unwrap();
+      toast.promise(createPromise, {
+        loading: "Creating group...",
+        success: "Group created successfully",
+        error: "Something went wrong",
+      });
     }
   };
   return (

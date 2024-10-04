@@ -26,7 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import CustomPagination from "@/components/CustomPagination";
 import Loader from "@/components/Loader/Loader";
 import ServerError from "@/components/ServerError";
@@ -55,11 +55,19 @@ function HomePage() {
     if (deleteGroupStatus === "succeeded") {
       dispatch(fetchGroupList());
       dispatch(resetDeleteGroup());
-      toast.success("Group deleted successfully");
     } else if (deleteGroupStatus === "failed") {
-      toast.error("Failed to delete group");
+      dispatch(resetDeleteGroup());
     }
   }, [deleteGroupStatus]);
+
+  const handleDeleteGroup = (id) => {
+    const deletePromise = dispatch(fetchGroupDelete(id)).unwrap();
+    toast.promise(deletePromise, {
+      loading: "Deleting group...",
+      success: "Group deleted successfully",
+      error: "Something went wrong",
+    });
+  };
 
   return (
     <>
@@ -133,7 +141,7 @@ function HomePage() {
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/70"
-                          onClick={() => dispatch(fetchGroupDelete(group.id))}
+                          onClick={() => handleDeleteGroup(group.id)}
                         >
                           Delete
                         </AlertDialogAction>

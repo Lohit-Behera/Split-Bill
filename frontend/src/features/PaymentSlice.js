@@ -1,63 +1,46 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 import { baseUrl } from "./Proxy";
 
-export const fetchCreatePayment = createAsyncThunk('payment/fetchCreatePayment', async (data, {rejectWithValue}) => {
+export const fetchCreatePayment = createAsyncThunk('payment/fetchCreatePayment', async (paymentData, {rejectWithValue}) => {
     try {
-        const response = await fetch(`${baseUrl}/api/create/payment/${data.id}/`, {
-            method: 'POST',
+        const config = {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data),
-        });
-        if (!response.ok) {
-            const errorData = await response.json();
-            return rejectWithValue(errorData);
         }
+        const { data } = await axios.post(`${baseUrl}/api/create/payment/${paymentData.id}/`, paymentData, config);
+        return data;
 
-        const result = await response.json();
-        return result;
     } catch (error) {
         return rejectWithValue(error.message);
     }
 })
 
 export const fetchGetPayment = createAsyncThunk('payment/fetchGetPayment', async (id, {rejectWithValue}) => {
-    try {
-        const response = await fetch(`${baseUrl}/api/payment/${id}/`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        if (!response.ok) {
-            const errorData = await response.json();
-            return rejectWithValue(errorData);
-        }
-
-        const result = await response.json();
-        return result;
-    } catch (error) {
-        return rejectWithValue(error.message);
+   try {
+    const config = {
+        headers: {
+            'Content-Type': 'application/json',
+        },
     }
+    const { data } = await axios.get(`${baseUrl}/api/payment/${id}/`, config);
+    return data;
+   } catch (error) {
+    return rejectWithValue(error.message);
+   }
 })
 
-export const fetchListPayment = createAsyncThunk('payment/fetchListPayment', async (data, {rejectWithValue}) => {
+export const fetchListPayment = createAsyncThunk('payment/fetchListPayment', async (paymentData, {rejectWithValue}) => {
     try {
-        const response = await fetch(`${baseUrl}/api/list/payment/${data.id}/${data.page}`, {
-            method: 'GET',
+        const config = {
             headers: {
                 'Content-Type': 'application/json',
             },
-            data
-        });
-        if (!response.ok) {
-            const errorData = await response.json();
-            return rejectWithValue(errorData);
         }
 
-        const result = await response.json();
-        return result;
+        const { data } = await axios.get(`${baseUrl}/api/list/payment/${paymentData.id}/${paymentData.page}`, config);
+        return data;
     } catch (error) {
         return rejectWithValue(error.message);
     }
@@ -65,41 +48,27 @@ export const fetchListPayment = createAsyncThunk('payment/fetchListPayment', asy
 
 export const fetchDeletePayment = createAsyncThunk('payment/delete=', async (id, {rejectWithValue}) => {
     try {
-        const response = await fetch(`${baseUrl}/api/delete/payment/${id}/`, {
-            method: 'DELETE',
+        const config = {
             headers: {
                 'Content-Type': 'application/json',
             },
-        });
-        if (!response.ok) {
-            const errorData = await response.json();
-            return rejectWithValue(errorData);
         }
-
-        const result = await response.json();
-        return result;
+        const { data } = await axios.delete(`${baseUrl}/api/delete/payment/${id}/`, config);
+        return data;
     } catch (error) {
         return rejectWithValue(error.message);
     }
 })
 
-export const fetchUpdatePayment = createAsyncThunk('payment/update', async (data, {rejectWithValue}) => {
+export const fetchUpdatePayment = createAsyncThunk('payment/update', async (paymentData, {rejectWithValue}) => {
     try {
-        const response = await fetch(`${baseUrl}/api/update/payment/${data.id}/`, {
-            method: 'PUT',
+        const config = {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            return rejectWithValue(errorData);
         }
-
-        const result = await response.json();
-        return result;
+        const { data } = await axios.put(`${baseUrl}/api/update/payment/${paymentData.id}/`, paymentData, config);
+        return data;
     } catch (error) {
         return rejectWithValue(error.message);
     }
